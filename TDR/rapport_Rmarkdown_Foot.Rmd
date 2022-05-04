@@ -1,0 +1,190 @@
+---
+title: "Rapport Automatisé - Rmarkdown"
+author: "V. Tolon & V. Payet"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '4'
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+bibliography: biblio2.bib
+csl: iso690-author-date-fr-no-abstract.csl
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+```
+
+```{r logo, echo=FALSE, out.width = '30%', fig.align = "center",fig.cap="Logo Rmarkdown"}
+knitr::include_graphics("rmarkdown.png")
+```
+
+
+&nbsp;
+
+# **Introduction**: 
+
+Dans ce rapport nous analyserons  des profils de joueurs offensifs du championnat de France sur la saison 2017-2018.Les analyses seront faites avec R (@R2019).
+
+
+# **Présentation des données**
+
+Nous transformons les données en fréquence d'évènements par heure de jeu.
+ 
+```{r import, echo = T}
+jouA <- read.csv2("joueurs.csv",header=TRUE,sep=";",row.names=1,encoding = "latin1")
+jou1<-jouA[,c(1:2,4:8)]
+jou1b<-jou1/(jouA$Minutes.jouees/60)
+jou<-data.frame(jou1b,Minutes.jouees=jouA$Minutes.jouees)
+jou<-na.omit(jou)
+```
+
+## **Les données**
+
+```{r data1, echo = T,eval=T}
+names(jou)
+dim(jou)
+head(round(jou,3),3)
+```
+
+
+Le jeu de donné est complété pour `r nrow(jou)` joueurs et contient  `r ncol(jou)` variables. La fréquence moyenne de buts marqués par heure de jeu et par attaquant est égale à `r round(mean(unlist(jou[,1])),2)` $+/-$ `r round(sd(unlist(jou[,1])),2)`  (moyenne $+/-$ écart type).  
+
+
+# **Une première analyse **
+ 
+## **Histogrammes**
+ 
+```{r histo, echo = F,eval=T,fig.height = 6, fig.width = 8, fig.align = "center",fig.cap="Histogrammes"}
+
+Phisto <- function(tableau){
+  par(mar=c(2,4,4,1))
+  p <- ncol(tableau)
+  for( i in 1:p){
+    hist(tableau[,i],main=names(tableau)[i],xlab="",ylab="Effectif",col="gold")
+    rug(tableau[,i])
+    abline(v=mean(tableau[,i]),lty=2,col="red",lwd=2)
+  }
+}
+
+## utilisons la fonctions Phisto()
+par(mfrow=c(3,3))
+Phisto(jou)
+#Reperez les quelques anomalies de distribution qui pourraient vous aider
+#? comprendre la suite (ce n'est pas toujours le cas)
+```
+
+**Interprétation**: Nous observons que ....................
+
+## **Corrélations**
+
+On peut les représenter comme ceci : 
+
+```{r cor2, echo = F,eval=T,fig.height = 4, fig.width = 4, fig.align = "center",fig.cap="Table des corrélations"}
+kable(round(cor(jou),3))
+
+```
+
+
+**Interprétation**: ........................... 
+
+
+# **Analyse en Composante Principale  **
+
+## **Rappels**
+
+Une ACP permet d'analyser simultanément les liens entre de multiples variables quantitatives et d'analyser les positions des individus vis à vis de l'ensemble de ces variables. Elle est basée sur la recherche d'axes principaux indépendants, chacun plus ou moins liés aux variables d'entrées. Pour rappel l’inertie totale se calcul par : 
+$$I=\sum^N_{i=1}\frac{1}{N}d^2_{(e_i;g)}$$
+Avec $d^2_{e_i,g}=\sum^p_{j=1}x^2_{ij}$ = Distance euclidienne au centre de gravité du nuage de point avec des données centrée et normées. 
+
+## **Les valeurs propres**
+
+Elles permettent de déterminer la proportion d’inertie expliquée par chacun des axes :  
+
+```{r valp, echo = T,eval=F,fig.cap="Valeurs propres",fig.height = 3, fig.width = 4,fig.align="center",}
+
+library(FactoMineR)
+
+PCAs <- PCA(jou,graph=F)
+
+#Choix des axes
+par(mfrow=c(1,1),mar=c(4,4,3,3))
+barplot(PCAs$eig[,2],ylab="Inertie %",names.arg = paste("Axe",1: nrow(PCAs$eig)),las=2,cex.axis=0.7,cex.lab=0.8)
+```
+
+&nbsp;
+
+**Interprétation**:  .......................
+
+## **Le partitionnement**
+
+```{r indiv, echo = T,eval=F,fig.cap="Cercle des corrélations",fig.height =4 , fig.width = 4,fig.align="center"}
+#Partitionnement 
+hcjou<-HCPC(PCAs,graph=F,nb.clust=4,consol = F)
+plot(hcjou,choice="tree")
+```
+&nbsp;
+**Interprétation**: Nous observons que    ......
+
+## **Le cercle des corrélations**
+```{r circle12, echo = T,eval=F,fig.cap="Nuage des individus",fig.height = 4, fig.width = 4, fig.align = "center"}
+plot(PCAs,choix="var")
+```
+
+**Interprétation**: Nous observons que l'axe 1 est expliqué par ................. 
+
+## **Le nuage des individus**
+```{r indiv12, echo = T,eval=F,fig.cap="Nuage des individus",fig.height = 5, fig.width = 5, fig.align = "center"}
+plot(hcjou,choice="map",draw.tree = F)
+```
+**Interprétation**: Nous observons que  .................
+
+## **Description des groupes**
+
+```{r groupes, echo = T,eval=F,fig.cap="Nuage des individus",fig.height = 5, fig.width = 5, fig.align = "center"}
+lapply(hcjou$desc.var$quanti,function(x) return(round(data.frame(x)[-6],2)))
+
+```
+
+
+**Interprétation**: 
+
+Les groupes sont décrits dans la table suivante : 
+
+```{r groupe, echo = F,eval=T}
+num<-1:4
+nom<-c("A","B","C","D")
+desc<-c("Les mauvais joueurs provocateurs","Les mauvais buteurs","Les bons buteurs sans histoire","Les bons buteurs sous pression")
+dd<-data.frame(Numero=num,Nom=nom,Description=desc)
+kable(dd,row.names=F,caption="Description des groupes",align="c")
+```
+
+
+
+&nbsp;
+
+# **Conclusions  **
+
+
+Les joueurs de foot sont vraiment des gens très très forts [@wisloeff1998strength]. Néanmoins nous savons que les performances ne sont pas les mêmes suivant leurs profils [*attaquants* :  @little2003specificity; et *défenseurs* :  @mohr2003match]. Ceci pourrait fortement impacter leurs tactiques sur le terrain même si @wisloeff1998strength suggère qu'au fond tout cela n'est qu'un jeu sans importance.  
+
+
+&nbsp;
+
+
+# **Références**
+
+*Liens* 
+
+<https://www.footballdatabase.eu/fr/>   
+<https://rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf>
+<https://bookdown.org/yihui/rmarkdown/>
+
+
+*Bibliographie* 
+
