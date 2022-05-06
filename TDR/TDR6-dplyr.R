@@ -1,12 +1,12 @@
 ## TDR6 avec dplyr
-## OPEN22
-## 2022-05-06
+## Pauline M. Perrin
+## 06/05/2022
 
 ## Packages
 library(dplyr)
 
 ## Importer les données dans un objet t3var.
-t3var <- read.table("data/t3var.txt", header=TRUE, dec=".", sep="\t")
+t3var <- read.table("t3var.txt", header=TRUE, dec=".", sep="\t")
 
 ## Identifier les noms des variables de ce jeu de données.
 head(t3var)
