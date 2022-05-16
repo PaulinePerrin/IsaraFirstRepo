@@ -1,0 +1,26 @@
+{
+    "id": "9F9DF080",
+    "path": "~/Desktop/ISARA/4A/Optionnel D - OPEN/R studio/Shiny/TDShiny/app.R",
+    "project_path": "app.R",
+    "type": "r_source",
+    "hash": "3981185688",
+    "contents": "",
+    "dirty": false,
+    "created": 1652717515730.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "27,0",
+        "scrollLine": "3"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1652717830,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1652717830655,
+    "read_only": false,
+    "read_only_alternatives": []
+}
